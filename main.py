@@ -1,3 +1,19 @@
+"""
+Must have a .env file in the root folder with this data:
+
+USER=""
+PASSWORD=""
+API_KEY=""
+URL="https://api.perch.rocks/v1"
+TEAM_ID=1234
+
+QA_USER=""
+QA_PASSWORD=""
+QA_API_KEY=""
+QA_URL="https://api.qa.perchsecurity.com/v1"
+QA_TEAM_ID=4321
+"""
+
 from client.client import PerchAPIClient
 from config.settings import Config
 

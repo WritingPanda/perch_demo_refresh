@@ -2,3 +2,4 @@ venv
 .env
 .vscode
 queueNuke_py.py
+**/__pycache__/
