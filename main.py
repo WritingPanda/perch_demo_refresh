@@ -13,13 +13,13 @@ QA_API_KEY=STR
 QA_URL=STR
 QA_TEAM_ID=INT
 """
-
+import argparse
 from client.client import PerchAPIClient
 from config.settings import Config
 
 
-def main():
-    conf = Config(test_env=True)
+def main(test_env: bool) -> None:
+    conf = Config(test_env=test_env)
     client = PerchAPIClient(api_key=conf.get_api_key(), 
                             username=conf.get_username(), 
                             password=conf.get_password(), 
@@ -39,4 +39,13 @@ def main():
         print(counter)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Determine whether to use test env or production env.')
+    parser.add_argument('Environment',
+                         type=str,
+                         choices=['test', 'prod'],
+                         help='Determine the environment to send requests: test or prod.')
+    args = parser.parse_args()
+    if args.Environment == 'test':
+        main(test_env=True)
+    elif args.Environment == 'prod':
+        main(test_env=False)
