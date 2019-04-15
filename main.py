@@ -1,17 +1,17 @@
 """
 Must have a .env file in the root folder with this data:
 
-USER=""
-PASSWORD=""
-API_KEY=""
-URL="https://api.perch.rocks/v1"
-TEAM_ID=1234
+USER=STR
+PASSWORD=STR
+API_KEY=STR
+URL=STR
+TEAM_ID=INT
 
-QA_USER=""
-QA_PASSWORD=""
-QA_API_KEY=""
-QA_URL="https://api.qa.perchsecurity.com/v1"
-QA_TEAM_ID=4321
+QA_USER=STR
+QA_PASSWORD=STR
+QA_API_KEY=STR
+QA_URL=STR
+QA_TEAM_ID=INT
 """
 
 from client.client import PerchAPIClient
@@ -26,12 +26,17 @@ def main():
                             base_url=conf.get_base_url(), 
                             team_id=conf.get_team_id())
 
-    res = client.get_alerts_list(1)
-    first_result = res[0]
-
-    print(client.suppress_alert(indicator_id=first_result['indicator_id'],
-                                community_id=first_result['community_id'],
-                                observable_id=first_result['observable_id']))
+    # Get a list of up to 1000 results
+    res = client.get_alerts_list(1000)
+    # Count through all of the requests (for debug and optimization purposes)
+    counter = 0
+    # Run through the loop of the results to suppress each one and increase the counter
+    # Print the results to the console
+    for alert in res:
+        print(client.suppress_alert(indicator_id=alert['indicator_id'],
+                                    community_id=alert['community_id']))
+        counter += 1
+        print(counter)
 
 if __name__ == '__main__':
     main()
