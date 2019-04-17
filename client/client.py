@@ -1,33 +1,37 @@
-import requests, json
+from requests import Session
+import json
 import logging
 
 
+# Set logging level for debug purposes
+logging.basicConfig(
+    format='[%(asctime)s] %(levelname)s %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.DEBUG
+)
+logger = logging.getLogger(__name__)
+
+
 class PerchAPIClient():
-    def __init__(self, 
-                 api_key: str, 
-                 username: str, 
-                 password: str,
-                 base_url: str,
-                 team_id: int):
+    def __init__(
+            self,
+            api_key: str,
+            username: str,
+            password: str,
+            base_url: str,
+            team_id: int):
         # Prepare the client with relevant API information and get a token for continued requests
         self.api_key = api_key
         self.username = username
         self.password = password
         self.team_id = team_id
         self.base_url = base_url
-        self.session = requests.Session()
+        self.session = Session()
         self.auth_token = self.get_auth_token()
         self.session.headers.update({
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + self.auth_token
         })
-        # Set logging level for debug purposes
-        logging.basicConfig(
-            format='[%(asctime)s] %(levelname)s %(message)s',
-            datefmt='%m/%d/%Y %I:%M:%S %p',
-            level=logging.WARNING
-        )
-        self.logger = logging.getLogger(__name__)
 
     # Every API request needs an auth_token, and we generate one for use with every request
     # of this instance of the client
@@ -38,22 +42,31 @@ class PerchAPIClient():
             'x-api-key': self.api_key
         })
 
+        logger.debug(self.session.headers)
+
         # This is a versioned API endpoint
         url = self.base_url + '/v1/auth/access_token/'
+
+        logger.debug(url)
         
-        res = self.session.post(url, data=request_body)
+        try:
+            res = self.session.post(url, data=request_body)
+        except Exception as e:
+            logger.debug(e)
 
         if not res.status_code == 200:
-            self.logger.error(f'Error. Status code: {res.status_code}\nReason: {res.text}')
+            logger.error(f'Status code: {res.status_code}. URL: {url}\nReason: {res.text}')
         else:
             res_body = res.json()
             return res_body['access_token']
 
     # Pull a list of all alerts and sort them by last seen
     # Limit number of results by 
-    def get_alerts_list(self, number_of_results: int):
+    def get_alerts_list(
+            self,
+            number_of_results: int):
         if number_of_results > 1000:
-            self.logger.error(f"Too many results. Requested amount: {number_of_results}. Max amount: 1000.")
+            logger.error(f"Too many results. Requested amount: {number_of_results}. Max amount: 1000.")
             return None
         params = {
             'team_id': self.team_id,
@@ -68,17 +81,18 @@ class PerchAPIClient():
         res = self.session.get(url, params=params)
 
         if not res.status_code == 200:
-            self.logger.error(f'Status code: {res.status_code}\nReason: {res.text}')
+            logger.error(f'Status code: {res.status_code}\nReason: {res.text}')
         elif len(res.json()['results']) < 1:
-            self.logger.warning(f'There are no alerts in the organization.')
+            logger.warning(f'There are no alerts in the organization.')
             return None
         else:
             results = res.json()['results']
             return results
 
-    def suppress_alert(self, 
-                       indicator_id: str, 
-                       community_id: int):
+    def suppress_alert(
+            self,
+            indicator_id: str,
+            community_id: int):
         # This is not a versioned API endpoint
         url = self.base_url + '/alerts/suppressions'
         data = {
@@ -97,7 +111,7 @@ class PerchAPIClient():
         
         # Check the status code -- as long as it is within the 200 range, it has been accepted
         if not res.status_code < 300:
-            self.logger.error(f'Status code: {res.status_code}\nReason: {res.text}')
+            logger.error(f'Status code: {res.status_code}\nReason: {res.text}')
         else:
             # For debugging purposes
-            self.logger.info(f'Status code: {res.status_code}\nJSON Result: {res.json()}')
+            logger.info(f'Status code: {res.status_code}\nJSON Result: {res.json()}')

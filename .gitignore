@@ -1,6 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
 *$py.class
 
 # Environments
@@ -13,4 +12,4 @@ env.bak/
 venv.bak/
 
 .vscode
-queueNuke_py.py
+.idea
