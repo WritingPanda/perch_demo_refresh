@@ -27,7 +27,7 @@ def main(test_env: bool) -> None:
     # Get a list of up to 1000 results
     res = client.get_alerts_list(1000)
     # Count through all of the requests (for debug and optimization purposes)
-    counter = 0
+    # counter = 0
     print(res)
     # Run through the loop of the results to suppress each one and increase the counter
     # Print the results to the console

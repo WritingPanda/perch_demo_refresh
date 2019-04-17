@@ -45,7 +45,7 @@ class PerchAPIClient():
         logger.debug(self.session.headers)
 
         # This is a versioned API endpoint
-        url = self.base_url + '/v1/auth/access_token/'
+        url = self.base_url + '/v1/auth/access_token'
 
         logger.debug(url)
         
