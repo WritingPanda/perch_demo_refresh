@@ -88,9 +88,17 @@ class PerchAPIClient():
     def suppress_alert(
             self,
             indicator_id: str,
-            community_id: int):
+            community_id: int,
+            test_env: bool = False):
         # This is not a versioned API endpoint
-        url = self.base_url + '/alerts/suppressions'
+        if test_env is True:
+            url = self.base_url + '/alerts/suppressions'
+        elif test_env is False:
+            # The Perch application API (not the api.perch.rocks endpoint).
+            # The reason to use this is because the /alerts/suppressions
+            # endpoint is not yet public under api.perch.rocks.
+            # Once this is changed, I will remove this from the script.
+            url = 'https://api.perchsecurity.com/alerts/suppressions'
         data = {
             'indicatorId': indicator_id,
             'community': community_id,

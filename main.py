@@ -34,8 +34,19 @@ def main(test_env: bool) -> None:
     # Print the results to the console
     if res is not None:
         for alert in res:
-            print(client.suppress_alert(indicator_id=alert['indicator_id'],
-                                        community_id=alert['community_id']))
+            if test_env is True:
+                client.suppress_alert(
+                    indicator_id=alert['indicator_id'],
+                    community_id=alert['community_id'],
+                    test_env=True
+                )
+            elif test_env is False:
+                client.suppress_alert(
+                    indicator_id=alert['indicator_id'],
+                    community_id=alert['community_id'],
+                    test_env=False
+                )
+            
             counter += 1
             print(counter)
 
