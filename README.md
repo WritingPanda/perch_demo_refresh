@@ -8,13 +8,15 @@ The first thing you will need to do is create a virtual environment for Python 3
 
 Next, you will need to create a `.env` file with the following information:
 
-    USER=STR
+    # With python-decouple, you cannot use USER or USERNAME as the env variable
+    # It will use your computer's username, so we use PERCH_USER instead to avoid conflict
+    PERCH_USER=STR
     PASSWORD=STR
     API_KEY=STR
     URL=STR
     TEAM_ID=INT
 
-    QA_USER=STR
+    QA_PERCH_USER=STR
     QA_PASSWORD=STR
     QA_API_KEY=STR
     QA_URL=STR

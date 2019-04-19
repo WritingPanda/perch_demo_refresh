@@ -1,5 +1,4 @@
 from requests import Session
-import json
 import logging
 
 
@@ -7,7 +6,7 @@ import logging
 logging.basicConfig(
     format='[%(asctime)s] %(levelname)s %(message)s',
     datefmt='%m/%d/%Y %I:%M:%S %p',
-    level=logging.DEBUG
+    level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -36,24 +35,21 @@ class PerchAPIClient():
     # Every API request needs an auth_token, and we generate one for use with every request
     # of this instance of the client
     def get_auth_token(self):
-        request_body = json.dumps({'username': self.username, 'password': self.password})
+        request_body = {
+            'username': self.username, 
+            'password': self.password
+        }
+
         self.session.headers.update({
             'Content-Type': 'application/json',
             'x-api-key': self.api_key
         })
 
-        logger.debug(self.session.headers)
-
         # This is a versioned API endpoint
         url = self.base_url + '/v1/auth/access_token'
-
-        logger.debug(url)
         
-        try:
-            res = self.session.post(url, data=request_body)
-        except Exception as e:
-            logger.debug(e)
-
+        res = self.session.post(url, json=request_body)
+        
         if not res.status_code == 200:
             logger.error(f'Status code: {res.status_code}. URL: {url}\nReason: {res.text}')
         else:
