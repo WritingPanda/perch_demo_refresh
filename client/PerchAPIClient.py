@@ -2,13 +2,7 @@ from requests import Session
 import logging
 
 
-# Set logging level for debug purposes
-logging.basicConfig(
-    format='[%(asctime)s] %(levelname)s %(message)s',
-    datefmt='%m/%d/%Y %I:%M:%S %p',
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+module_logger = logging.getLogger('perch_demo_refresh.client.PerchAPIClient')
 
 
 class PerchAPIClient():
@@ -20,17 +14,18 @@ class PerchAPIClient():
             base_url: str,
             team_id: int):
         # Prepare the client with relevant API information and get a token for continued requests
-        self.api_key = api_key
         self.username = username
         self.password = password
-        self.team_id = team_id
+        self.api_key = api_key
         self.base_url = base_url
+        self.team_id = team_id
         self.session = Session()
         self.auth_token = self.get_auth_token()
         self.session.headers.update({
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + self.auth_token
         })
+        self.logger = logging.getLogger('perch_demo_refresh.client.PerchAPIClient')
 
     # Every API request needs an auth_token, and we generate one for use with every request
     # of this instance of the client
@@ -51,7 +46,7 @@ class PerchAPIClient():
         res = self.session.post(url, json=request_body)
         
         if not res.status_code == 200:
-            logger.error(f'Status code: {res.status_code}. URL: {url}\nReason: {res.text}')
+            self.logger.error(f'Status code: {res.status_code}. URL: {url}\nReason: {res.text}')
         else:
             res_body = res.json()
             return res_body['access_token']
@@ -60,9 +55,9 @@ class PerchAPIClient():
     # Limit number of results by 
     def get_alerts_list(
             self,
-            number_of_results: int):
+            number_of_results: int) -> None or list:
         if number_of_results > 1000:
-            logger.error(f"Too many results. Requested amount: {number_of_results}. Max amount: 1000.")
+            self.logger.error(f"Too many results. Requested amount: {number_of_results}. Max amount: 1000.")
             return None
         params = {
             'team_id': self.team_id,
@@ -77,10 +72,11 @@ class PerchAPIClient():
         res = self.session.get(url, params=params)
 
         if not res.status_code == 200:
-            logger.error(f'Status code: {res.status_code}\nReason: {res.text}')
-        elif len(res.json()['results']) < 1:
-            logger.warning(f'There are no alerts in the organization.')
+            self.logger.error(f'Status code: {res.status_code}\nReason: {res.text}')
             return None
+        elif len(res.json()['results']) < 1:
+            self.logger.warning(f'There are no alerts in the organization.')
+            return res.json()['results']
         else:
             results = res.json()['results']
             return results
@@ -115,7 +111,7 @@ class PerchAPIClient():
         
         # Check the status code -- as long as it is within the 200 range, it has been accepted
         if not res.status_code < 300:
-            logger.error(f'Status code: {res.status_code}\nReason: {res.text}')
+            self.logger.error(f'Status code: {res.status_code}\nReason: {res.text}')
         else:
             # For debugging purposes
-            logger.info(f'Status code: {res.status_code}\nJSON Result: {res.json()}')
+            self.logger.info(f'Status code: {res.status_code}\nJSON Result: {res.json()}')
